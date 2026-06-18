@@ -1,0 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Noto+Serif+JP:wght@300;400;500;650;700;900&family=Inter:wght@100..900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Noto Serif JP", "Cormorant Garamond", serif;
+  --font-sans: "Inter", sans-serif;
+  
+  --color-spa-primary: #12402b;
+  --color-spa-secondary: #f4f0e6;
+  --color-spa-bg: #faf9f6;
+  --color-spa-text: #232d29;
+  --color-spa-gold: #c39e6c;
+}
+
+@layer base {
+  body {
+    @apply bg-spa-bg text-spa-text font-serif antialiased;
+  }
+}
+
+.card-shadow {
+  box-shadow: 0px 4px 20px rgba(18, 64, 43, 0.04);
+}
