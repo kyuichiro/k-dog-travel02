@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>近鉄フレンドリードッグ旅診断カルテ - スタンドアロン版</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Noto Serif JP & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=Noto+Serif+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['"Noto Serif JP"', 'serif'],
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            spa: {
+              primary: '#12402b',
+              secondary: '#f4f0e6',
+              bg: '#faf9f6',
+              text: '#232d29',
+              gold: '#c39e6c',
+            }
+          },
+          boxShadow: {
+            'card': '0px 4px 20px rgba(18, 64, 43, 0.04)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #faf9f6;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #c39e6c40;
+      border-radius: 99px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #c39e6c80;
+    }
+    
+    /* Smooth transitions */
+    .fade-enter {
+      animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="bg-spa-bg text-spa-text font-sans antialiased min-h-screen flex flex-col selection:bg-spa-gold/30 selection:text-spa-primary">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-spa-secondary/80 sticky top-0 z-40 px-4 py-3.5 sm:px-6">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-spa-primary rounded-xl flex items-center justify-center text-white shadow-sm">
+          <i data-lucide="compass" class="w-5 h-5 text-spa-secondary"></i>
+        </div>
+        <div>
+          <span class="text-[9px] font-bold uppercase tracking-widest text-spa-primary block">Kintetsu Friendly Dog Spa</span>
+          <h1 class="font-serif font-bold text-sm sm:text-base tracking-tight text-spa-primary leading-tight">愛犬お出かけカルテ診断</h1>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="downloadSelf()" class="inline-flex items-center gap-1.5 bg-spa-primary text-white text-xs font-bold px-3 py-2 rounded-full hover:opacity-90 transition shadow-xs cursor-pointer">
+          <i data-lucide="download" class="w-3.5 h-3.5"></i>
+          <span>このHTMLを保存</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6 sm:px-6 flex flex-col lg:flex-row gap-6 relative">
+    
+    <!-- Left Sidebar -->
+    <aside class="w-full lg:w-[280px] space-y-6 lg:shrink-0 flex flex-col justify-between">
+      <div class="bg-white rounded-3xl p-5 border border-spa-secondary/60 shadow-card space-y-5">
+        
+        <!-- App Title Section -->
+        <div class="flex items-center gap-3 border-b border-spa-secondary/50 pb-4">
+          <div class="w-10 h-10 bg-spa-primary rounded-xl flex items-center justify-center text-white">
+            <i data-lucide="paw-print" class="w-5 h-5 text-spa-secondary"></i>
+          </div>
+          <div>
+            <span class="text-[10px] font-extrabold uppercase tracking-widest text-spa-primary block">Portal System</span>
+            <h4 class="font-serif font-bold text-sm text-spa-text">愛犬トラベルカルテ</h4>
+          </div>
+        </div>
+
+        <!-- Dog Info Form Block -->
+        <div class="space-y-4">
+          <h4 class="font-bold text-xs text-spa-primary uppercase tracking-wider flex items-center gap-1.5">
+            <i data-lucide="settings" class="w-3.5 h-3.5"></i>愛犬の基本情報
+          </h4>
+          
+          <div class="space-y-3.5 bg-spa-secondary/20 p-4 rounded-2xl border border-spa-secondary/50">
+            <div>
+              <label class="block text-[10px] font-bold text-gray-500 mb-1">愛犬のお名前</label>
+              <input type="text" id="dogNameInput" value="ココア" oninput="updateDogInfo()" class="w-full text-xs font-semibold p-2.5 rounded-xl bg-white border border-spa-secondary/80 text-spa-text placeholder-gray-400 focus:outline-none focus:border-spa-primary" placeholder="例: ココア">
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-gray-500 mb-1">犬種</label>
+              <input type="text" id="dogBreedInput" value="トイプードル" oninput="updateDogInfo()" class="w-full text-xs font-semibold p-2.5 rounded-xl bg-white border border-spa-secondary/80 text-spa-text placeholder-gray-400 focus:outline-none focus:border-spa-primary" placeholder="例: チワワ">
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-gray-500 mb-1">年齢（才）</label>
+              <select id="dogAgeInput" onchange="updateDogInfo()" class="w-full text-xs font-semibold p-2.5 rounded-xl bg-white border border-spa-secondary/80 text-spa-text focus:outline-none focus:border-spa-primary">
+                <option value="0">0才（パピー）</option>
+                <option value="1">1才</option>
+                <option value="2">2才</option>
+                <option value="3" selected>3才</option>
+                <option value="4">4才</option>
+                <option value="5">5才</option>
+                <option value="6">6才</option>
+                <option value="7">7才（シニア期）</option>
+                <option value="8">8才</option>
+                <option value="9">9才</option>
+                <option value="10">10才以上</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation / Actions -->
+        <div class="space-y-2">
+          <h4 class="font-bold text-xs text-spa-primary uppercase tracking-wider flex items-center gap-1.5 border-b border-gray-100 pb-2">
+            <i data-lucide="navigation" class="w-3.5 h-3.5"></i>メニュー
+          </h4>
+          <button onclick="showModal('checklist')" class="w-full text-left py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-between text-gray-650 hover:bg-spa-secondary/40 transition">
+            <span class="flex items-center gap-2"><i data-lucide="shield-check" class="w-4 h-4 text-spa-primary"></i>持ち物チェックリスト</span>
+            <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-gray-400"></i>
+          </button>
+          <button onclick="showModal('etiquette')" class="w-full text-left py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-between text-gray-650 hover:bg-spa-secondary/40 transition">
+            <span class="flex items-center gap-2"><i data-lucide="heart-pulse" class="w-4 h-4 text-spa-primary"></i>お出かけマナー</span>
+            <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-gray-400"></i>
+          </button>
+          <button onclick="showModal('coupon')" class="w-full text-left py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-between text-gray-650 hover:bg-spa-secondary/40 transition">
+            <span class="flex items-center gap-2"><i data-lucide="ticket" class="w-4 h-4 text-spa-primary"></i>10%OFFクーポン</span>
+            <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-gray-400"></i>
+          </button>
+        </div>
+
+        <!-- Area Selection -->
+        <div class="space-y-3">
+          <h4 class="font-bold text-xs text-spa-primary uppercase tracking-wider flex items-center gap-1.5">
+            <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>お出かけ希望エリア
+          </h4>
+          <div class="grid grid-cols-2 gap-2">
+            <button id="areaBtn-伊勢志摩" onclick="selectArea('伊勢志摩')" class="py-2 px-2 text-center rounded-xl text-[11px] font-bold transition border bg-spa-primary text-white border-spa-primary shadow-xs">伊勢志摩</option>
+            <button id="areaBtn-軽井沢" onclick="selectArea('軽井沢')" class="py-2 px-2 text-center rounded-xl text-[11px] font-bold transition border bg-gray-50 border-gray-100 hover:bg-spa-secondary/30 text-gray-700">軽井沢</option>
+            <button id="areaBtn-箱根・富士" onclick="selectArea('箱根・富士')" class="py-2 px-2 text-center rounded-xl text-[11px] font-bold transition border bg-gray-50 border-gray-100 hover:bg-spa-secondary/30 text-gray-700">箱根・富士</option>
+            <button id="areaBtn-淡路島" onclick="selectArea('淡路島')" class="py-2 px-2 text-center rounded-xl text-[11px] font-bold transition border bg-gray-50 border-gray-100 hover:bg-spa-secondary/30 text-gray-700">淡路島</option>
+          </div>
+        </div>
+      </div>
+
+      <!-- Left Ads (PR) -->
+      <div class="space-y-4 pt-4 border-t border-spa-secondary/40">
+        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block text-center">- PARTNER LYNX (PR) -</span>
+        
+        <!-- Ad 1: Laurel Coat -->
+        <div onclick="showModal('ad_laurel')" class="bg-gradient-to-br from-[#fcfaf5] to-[#f7f3e8] rounded-2xl p-4 border border-spa-gold/30 relative overflow-hidden group hover:shadow-md transition cursor-pointer text-left">
+          <span class="absolute top-2 right-2 bg-amber-500/10 text-amber-700 text-[8px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">特別提携PR</span>
+          <div class="pr-8">
+            <h5 class="font-bold text-xs text-amber-900 leading-snug group-hover:text-amber-700 transition">
+              近鉄のペット共生マンション<br />【ローレルコート for Dog】
+            </h5>
+            <p class="text-[10px] text-amber-800/85 mt-1.5 leading-relaxed">
+              敷地内ドッグラン＆専用足洗い場完備！愛犬の暮らしを中心に設計された次世代プレミアム分譲マンション、先行見学会受付中。
+            </p>
+          </div>
+          <div class="flex justify-between items-center mt-3 pt-2.5 border-t border-amber-200/50">
+            <span class="text-[9px] text-amber-600 font-bold">モデルルーム来場で犬用おやつ進呈</span>
+            <i data-lucide="chevron-right" class="w-3 h-3 text-amber-500 group-hover:translate-x-1 transition"></i>
+          </div>
+        </div>
+
+        <!-- Ad 2: Insurance -->
+        <div onclick="showModal('ad_insurance')" class="bg-gradient-to-br from-[#f4f7fa] to-[#e9f0f5] rounded-2xl p-4 border border-blue-200/40 relative overflow-hidden group hover:shadow-md transition cursor-pointer text-left">
+          <span class="absolute top-2 right-2 bg-blue-500/10 text-blue-700 text-[8px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">提携PR</span>
+          <div class="pr-8">
+            <h5 class="font-bold text-xs text-blue-900 leading-snug group-hover:text-blue-700 transition">
+              旅先のケガ・器物破損に備える<br />【近鉄のペットあんしん保険】
+            </h5>
+            <p class="text-[10px] text-blue-800/85 mt-1.5 leading-relaxed">
+              ホテル備品の破損や、旅先トラブルの個人賠償責任を最大1,000万円補償！1日あたり約35円から入れる新感覚ペット専用健康保険。
+            </p>
+          </div>
+          <div class="flex justify-between items-center mt-3 pt-2.5 border-t border-blue-200/50">
+            <span class="text-[9px] text-blue-600 font-bold">無料のパンフレット・お見本はこちら</span>
+            <i data-lucide="chevron-right" class="w-3 h-3 text-blue-500 group-hover:translate-x-1 transition"></i>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Center Interactive Area -->
+    <section class="flex-1 min-w-0 space-y-6">
+      
+      <!-- Welcome Intro Section (Step: Intro) -->
+      <div id="step-intro" class="bg-white rounded-3xl p-6 sm:p-10 border border-spa-secondary/60 shadow-card text-center space-y-6 fade-enter">
+        <span class="font-serif italic text-spa-gold text-lg block">Kintetsu Friendly Dog Pass Portal</span>
+        <div class="max-w-xl mx-auto space-y-4">
+          <h2 class="font-serif font-bold text-2xl sm:text-3.5xl text-spa-primary leading-tight tracking-tight">
+            愛犬との「最高の旅」を仕立てる<br />お出かけカルテ診断
+          </h2>
+          <div class="h-px bg-gradient-to-r from-transparent via-spa-gold/40 to-transparent w-40 mx-auto"></div>
+          <p class="text-xs sm:text-sm text-gray-500 leading-relaxed font-sans">
+            愛犬の性格や好みに合わせて、おすすめの客室・過ごし方・周辺同伴スポットを自動でマッチング。旅先での不安やマナーもすべて網羅した、あなただけのデジタルお出かけカルテを今すぐ作成しましょう。
+          </p>
+        </div>
+
+        <div class="bg-spa-secondary/30 max-w-lg mx-auto p-5 rounded-2xl border border-spa-secondary/50 flex items-center gap-4 text-left">
+          <div class="w-10 h-10 bg-spa-primary/10 rounded-full flex items-center justify-center shrink-0">
+            <i data-lucide="heart" class="w-5 h-5 text-spa-primary"></i>
+          </div>
+          <div>
+            <h5 class="text-xs font-bold text-spa-primary">3分でわかる愛犬のトラベルカルテ</h5>
+            <p class="text-[11px] text-gray-500 leading-normal mt-0.5">簡単な3つの質問に答えるだけで、愛犬のストレス耐性、移動時の快適メニュー、伊勢志摩をはじめとする各プレミアムペット宿のおすすめマッチングプランを提示します。</p>
+          </div>
+        </div>
+
+        <button onclick="startDiagnosis()" class="bg-spa-primary text-white w-full max-w-sm mx-auto py-4 rounded-full text-lg font-bold hover:opacity-90 active:scale-98 transition flex items-center justify-center gap-2 shadow-lg shadow-spa-primary/25 cursor-pointer">
+          <span>診断をはじめよう！</span>
+          <i data-lucide="arrow-right" class="w-5 h-5 text-spa-secondary"></i>
+        </button>
+      </div>
+
+      <!-- Question 1 Section -->
+      <div id="step-q1" class="hidden bg-white rounded-3xl p-6 sm:p-10 border border-spa-secondary/60 shadow-card space-y-6 fade-enter">
+        <div class="flex justify-between items-center text-xs font-bold text-spa-gold tracking-widest uppercase font-serif">
+          <span>QUESTION 01 / 03</span>
+          <span class="bg-spa-secondary text-spa-primary px-3 py-1 rounded-full text-[10px]">カルテ作成中</span>
+        </div>
+        <h3 class="font-serif font-bold text-xl sm:text-2xl text-spa-primary text-center leading-snug">
+          愛犬の「普段の性格」に近いものはどれですか？
+        </h3>
+        <p class="text-xs text-gray-400 text-center -mt-2">普段の生活や家族、他者と接するときの様子からお選びください</p>
+        
+        <div class="grid gap-4 max-w-xl mx-auto">
+          <button onclick="answerQuestion('q1', 1)" class="group w-full text-left p-4 rounded-2xl border-2 border-spa-secondary/60 hover:border-spa-primary hover:bg-spa-secondary/20 transition flex items-center gap-4">
+            <span class="w-8 h-8 rounded-full bg-spa-secondary group-hover:bg-spa-primary group-hover:text-white flex items-center justify-center font-bold text-sm text-spa-primary">A</span>
+            <div>
+              <h5 class="font-bold text-sm text-spa-text">人懐っこく、誰にでもシッポを振る元気っ子</h5>
+              <p class="text-xs text-gray-400 mt-0.5">ドッグランや外の環境が大好きで、社交的なタイプ</p>
+            </div>
+          </button>
+          <button onclick="answerQuestion('q1', 2)" class="group w-full text-left p-4 rounded-2xl border-2 border-spa-secondary/60 hover:border-spa-primary hover:bg-spa-secondary/20 transition flex items-center gap-4">
+            <span class="w-8 h-8 rounded-full bg-spa-secondary group-hover:bg-spa-primary group-hover:text-white flex items-center justify-center font-bold text-sm text-spa-primary">B</span>
+            <div>
+              <h5 class="font-bold text-sm text-spa-text">家族の側が一番。少し慎重で内弁慶なタイプ</h5>
+              <p class="text-xs text-gray-400 mt-0.5">慣れない場所や、見知らぬ人・犬には少し緊張しやすい</p>
+            </div>
+          </button>
+          <button onclick="answerQuestion('q1', 3)" class="group w-full text-left p-4 rounded-2xl border-2 border-spa-secondary/60 hover:border-spa-primary hover:bg-spa-secondary/20 transition flex items-center gap-4">
+            <span class="w-8 h-8 rounded-full bg-spa-secondary group-hover:bg-spa-primary group-hover:text-white flex items-center justify-center font-bold text-sm text-spa-primary">C</span>
+            <div>
+              <h5 class="font-bold text-sm text-spa-text">マイペースで、自分の時間を大切にするおっとり派</h5>
+              <p class="text-xs text-gray-400 mt-0.5">お家のお気に入りの場所でまったり過ごすのが得意な子</p>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Question 2 Section -->
+      <div id="step-q2" class="hidden bg-white rounded-3xl p-6 sm:p-10 border border-spa-secondary/60 shadow-card space-y-6 fade-enter">
+        <div class="flex justify-between items-center text-xs font-bold text-spa-gold tracking-widest uppercase font-serif">
+          <span>QUESTION 02 / 03</span>
+          <span class="bg-spa-secondary text-spa-primary px-3 py-1 rounded-full text-[10px]">カルテ作成中</span>
+        </div>
+        <h3 class="font-serif font-bold text-xl sm:text-2xl text-spa-primary text-center leading-snug">
+          これまでの「車や電車での移動」の経験はいかがですか？
+        </h3>
+        <p class="text-xs text-gray-400 text-center -mt-2">旅先へのアプローチ方法や快適度合いを判定します</p>
+
+        <div class="grid gap-4 max-w-xl mx-auto">
+          <button onclick="answerQuestion('q2', 1)" class="group w-full text-left p-4 rounded-2xl border-2 border-spa-secondary/60 hover:border-spa-primary hover:bg-spa-secondary/20 transition flex items-center gap-4">
+            <span class="w-8 h-8 rounded-full bg-spa-secondary group-hover:bg-spa-primary group-hover:text-white flex items-center justify-center font-bold text-sm text-spa-primary">A</span>
+            <div>
+              <h5 class="font-bold text-sm text-spa-text">お出かけ慣れしており、移動中もぐっすり眠れる</h5>
+              <p class="text-xs text-gray-400 mt-0.5">ドライブや電車移動がとても得意なエリートトラベラー</p>
+            </div>
+          </button>
+          <button onclick="answerQuestion('q2', 2)" class="group w-full text-left p-4 rounded-2xl border-2 border-spa-secondary/60 hover:border-spa-primary hover:bg-spa-secondary/20 transition flex items-center gap-4">
+            <span class="w-8 h-8 rounded-full bg-spa-secondary group-hover:bg-spa-primary group-hover:text-white flex items-center justify-center font-bold text-sm text-spa-primary">B</span>
+            <div>
+              <h5 class="font-bold text-sm text-spa-text">移動はできるが、時々ソワソワしたり少し緊張する</h5>
+              <p class="text-xs text-gray-400 mt-0.5">たまにハアハア（パンティング）したり、落ち着かないことがある</p>
+            </div>
+          </button>
+          <button onclick="answerQuestion('q2', 3)" class="group w-full text-left p-4 rounded-2xl border-2 border-spa-secondary/60 hover:border-spa-primary hover:bg-spa-secondary/20 transition flex items-center gap-4">
+            <span class="w-8 h-8 rounded-full bg-spa-secondary group-hover:bg-spa-primary group-hover:text-white flex items-center justify-center font-bold text-sm text-spa-primary">C</span>
+            <div>
+              <h5 class="font-bold text-sm text-spa-text">乗り物はほとんど未経験、または苦手（吠える・酔う）</h5>
+              <p class="text-xs text-gray-400 mt-0.5">近場の動物病院以外、本格的な遠出はしたことがない</p>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Question 3 Section -->
+      <div id="step-q3" class="hidden bg-white rounded-3xl p-6 sm:p-10 border border-spa-secondary/60 shadow-card space-y-6 fade-enter">
+        <div class="flex justify-between items-center text-xs font-bold text-spa-gold tracking-widest uppercase font-serif">
+          <span>QUESTION 03 / 03</span>
+          <span class="bg-spa-secondary text-spa-primary px-3 py-1 rounded-full text-[10px]">カルテ作成中</span>
+        </div>
+        <h3 class="font-serif font-bold text-xl sm:text-2xl text-spa-primary text-center leading-snug">
+          旅先のホテルや観光地で、一番「楽しみたいこと」は何ですか？
+        </h3>
+        <p class="text-xs text-gray-400 text-center -mt-2">旅のメインイベントを決定し、客室やプランをアジャストします</p>
+
+        <div class="grid gap-4 max-w-xl mx-auto">
+          <button onclick="answerQuestion('q3', 1)" class="group w-full text-left p-4 rounded-2xl border-2 border-spa-secondary/60 hover:border-spa-primary hover:bg-spa-secondary/20 transition flex items-center gap-4">
+            <span class="w-8 h-8 rounded-full bg-spa-secondary group-hover:bg-spa-primary group-hover:text-white flex items-center justify-center font-bold text-sm text-spa-primary">A</span>
+            <div>
+              <h5 class="font-bold text-sm text-spa-text">プライベートドッグランや大自然で、思いきり走り回る！</h5>
+              <p class="text-xs text-gray-400 mt-0.5">アクティブに遊び、ドッグスパ温泉などで遊び倒すプラン</p>
+            </div>
+          </button>
+          <button onclick="answerQuestion('q3', 2)" class="group w-full text-left p-4 rounded-2xl border-2 border-spa-secondary/60 hover:border-spa-primary hover:bg-spa-secondary/20 transition flex items-center gap-4">
+            <span class="w-8 h-8 rounded-full bg-spa-secondary group-hover:bg-spa-primary group-hover:text-white flex items-center justify-center font-bold text-sm text-spa-primary">B</span>
+            <div>
+              <h5 class="font-bold text-sm text-spa-text">静かなお部屋で、高級グルメや愛犬専用ディナーを味わう</h5>
+              <p class="text-xs text-gray-400 mt-0.5">周りを気にせず、絶品料理を一緒にのんびり味わうラグジュアリープラン</p>
+            </div>
+          </button>
+          <button onclick="answerQuestion('q3', 3)" class="group w-full text-left p-4 rounded-2xl border-2 border-spa-secondary/60 hover:border-spa-primary hover:bg-spa-secondary/20 transition flex items-center gap-4">
+            <span class="w-8 h-8 rounded-full bg-spa-secondary group-hover:bg-spa-primary group-hover:text-white flex items-center justify-center font-bold text-sm text-spa-primary">C</span>
+            <div>
+              <h5 class="font-bold text-sm text-spa-text">観光地やお洒落なドッグカフェなど、周辺観光も一緒にめぐる</h5>
+              <p class="text-xs text-gray-400 mt-0.5">写真映えするお出かけスポットや、観光列車同乗などトレンド体験</p>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Result Section -->
+      <div id="step-result" class="hidden space-y-6 fade-enter">
+        <div class="bg-white rounded-3xl p-6 sm:p-10 border border-spa-secondary/60 shadow-card space-y-6">
+          
+          <!-- Banner Title -->
+          <div class="bg-spa-primary/5 rounded-[32px] p-6 sm:p-10 border-2 border-spa-primary/20 space-y-6 text-center">
+            <div class="flex justify-between items-center border-b border-spa-primary/10 pb-4 max-w-xl mx-auto">
+              <span class="text-xs font-bold text-spa-gold tracking-widest uppercase font-serif">KINTETSU FRIENDLY DOG DIAGNOSIS</span>
+              <span class="text-[10px] font-bold text-spa-primary bg-spa-secondary px-3 py-1 rounded-full font-serif">お出かけ適性診断書</span>
+            </div>
+            
+            <div class="space-y-2">
+              <p class="text-xs font-bold text-spa-gold tracking-widest font-serif">診断結果カルテ</p>
+              <h2 class="font-serif font-black text-2xl sm:text-4xl text-spa-primary leading-tight tracking-tight">
+                <span id="resultDogName">ココア</span>ちゃんの旅カルテ
+              </h2>
+            </div>
+            
+            <div class="inline-flex items-center gap-6 bg-white px-6 py-3 rounded-2xl shadow-card border border-spa-secondary/80 text-xs text-gray-650">
+              <div><span class="font-bold text-gray-400 text-[10px] block mb-0.5">犬種</span><span id="resultDogBreed" class="font-bold text-spa-primary">トイプードル</span></div>
+              <div class="h-8 w-px bg-spa-secondary"></div>
+              <div><span class="font-bold text-gray-400 text-[10px] block mb-0.5">年齢</span><span id="resultDogAge" class="font-bold text-spa-primary">3才</span></div>
+              <div class="h-8 w-px bg-spa-secondary"></div>
+              <div><span class="font-bold text-gray-400 text-[10px] block mb-0.5">お出かけエリア</span><span id="resultArea" class="font-bold text-spa-primary">伊勢志摩</span></div>
+            </div>
+          </div>
+
+          <!-- Character Profiler -->
+          <div class="grid md:grid-cols-3 gap-6 items-stretch">
+            <div class="md:col-span-2 bg-gradient-to-r from-emerald-50/55 to-spa-secondary/35 p-6 rounded-2xl flex flex-col justify-between">
+              <div>
+                <h3 class="text-lg font-bold text-spa-primary flex items-center gap-1.5 mb-2 font-serif">
+                  <i data-lucide="heart" class="w-5 h-5 text-spa-primary fill-spa-primary/15"></i>
+                  愛犬カルテプロファイル： <span id="profileTitle">おっとりお姫様</span>
+                </h3>
+                <p id="profileDesc" class="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                  デリケートで内弁慶な面を持ちつつ、穏やかな環境では抜群の安心感を見せるおっとりお姫様タイプ。お部屋食が用意されている客室や、移動時の丁寧なケアが、旅全体の笑顔を最大化させます。
+                </p>
+              </div>
+              <div class="mt-4 pt-3 border-t border-emerald-100 text-[11px] text-gray-500 font-medium">
+                お出かけのアドバイス: <span id="profileAdvice">周囲の騒音を避けて、ゆったりとした時間を確保してください。</span>
+              </div>
+            </div>
+            
+            <div class="bg-spa-secondary/35 p-5 rounded-2xl border border-spa-secondary/80 flex flex-col justify-center items-center text-center">
+              <i data-lucide="award" class="w-10 h-10 text-spa-gold mb-2"></i>
+              <span class="text-[9px] font-black uppercase tracking-widest text-spa-primary block">TRAVEL COMPATIBILITY</span>
+              <h4 class="text-sm font-bold text-spa-primary mt-1">おすすめ宿泊スタイル</h4>
+              <p id="recommendStyle" class="text-xs text-gray-500 mt-1.5 leading-relaxed">
+                客室内露天風呂付、またはプライベートドッグラン付きの独立したプレミアム離れ・ヴィラ客室。
+              </p>
+            </div>
+          </div>
+
+          <!-- Long Description Narrative -->
+          <div class="mt-6">
+            <p id="characterLongDesc" class="text-sm text-gray-600 leading-relaxed bg-emerald-50/10 border-l-4 border-spa-primary p-4 rounded-r-xl font-serif">
+              慣れない移動や場所では最初は少しドキドキしてしまうかもしれませんが、一度お部屋に入れば、安心の飼い主様とのプライベート空間で最高のまったり時間を満喫できます。近鉄特急などをご利用の際も、余裕をもったタイムスケジュールが成功の鍵です。
+            </p>
+          </div>
+
+          <!-- Matching Facilities Header -->
+          <div class="pt-6 border-t border-spa-secondary/50 space-y-2">
+            <h3 class="font-serif font-bold text-xl text-spa-primary flex items-center gap-2">
+              <i data-lucide="compass" class="w-5 h-5 text-spa-gold"></i>
+              カルテ推奨：マッチングペット宿・サービス
+            </h3>
+            <p class="text-xs text-gray-500 leading-relaxed">
+              <span id="currentAreaName">伊勢志摩</span>エリアの近鉄ドッグスパ提携・推奨プレミアム宿の中から、適性に合わせた特別な宿泊プランとお部屋、また旅を支える周辺店舗をセレクト。
+            </p>
+          </div>
+
+          <!-- Facility Category Selector Tabs -->
+          <div class="grid grid-cols-3 gap-3">
+            <button id="catTab-泊まる" onclick="toggleCategory('泊まる')" class="border-2 rounded-2xl overflow-hidden cursor-pointer transition-all shadow-md border-spa-primary ring-2 ring-spa-primary/10">
+              <div class="bg-spa-primary text-white p-3 flex justify-between items-center">
+                <span class="font-bold text-xs tracking-widest uppercase flex items-center gap-1.5 font-serif">
+                  <i data-lucide="hotel" class="w-3.5 h-3.5"></i>泊まる（宿泊）
+                </span>
+                <span id="badge-stay" class="text-[9px] bg-white/20 text-white font-bold px-1.5 py-0.5 rounded-full">2件</span>
+              </div>
+              <div class="p-3 text-left">
+                <span class="text-[10px] text-gray-400 font-bold block mb-0.5">RECOMMENDED HOTEL</span>
+                <h5 id="stayTitle" class="font-bold text-xs text-spa-text truncate leading-tight">プレジール伊勢志摩ドッグヴィラ</h5>
+              </div>
+            </button>
+
+            <button id="catTab-食べる" onclick="toggleCategory('食べる')" class="border-2 rounded-2xl overflow-hidden cursor-pointer transition-all shadow-sm border-gray-100 hover:border-spa-primary/40">
+              <div class="bg-emerald-800 text-white p-3 flex justify-between items-center">
+                <span class="font-bold text-xs tracking-widest uppercase flex items-center gap-1.5 font-serif">
+                  <i data-lucide="utensils" class="w-3.5 h-3.5"></i>食べる（同伴店）
+                </span>
+                <span id="badge-eat" class="text-[9px] bg-white/20 text-white font-bold px-1.5 py-0.5 rounded-full">2件</span>
+              </div>
+              <div class="p-3 text-left">
+                <span class="text-[10px] text-gray-400 font-bold block mb-0.5">DOG CAFE & DINING</span>
+                <h5 id="eatTitle" class="font-bold text-xs text-spa-text truncate leading-tight">志摩マリンサイドカフェ</h5>
+              </div>
+            </button>
+
+            <button id="catTab-遊ぶ" onclick="toggleCategory('遊ぶ')" class="border-2 rounded-2xl overflow-hidden cursor-pointer transition-all shadow-sm border-gray-100 hover:border-spa-primary/40">
+              <div class="bg-spa-gold text-white p-3 flex justify-between items-center">
+                <span class="font-bold text-xs tracking-widest uppercase flex items-center gap-1.5 font-serif">
+                  <i data-lucide="compass" class="w-3.5 h-3.5"></i>遊ぶ・メニュー
+                </span>
+                <span id="badge-play" class="text-[9px] bg-white/20 text-white font-bold px-1.5 py-0.5 rounded-full">2件</span>
+              </div>
+              <div class="p-3 text-left">
+                <span class="text-[10px] text-gray-400 font-bold block mb-0.5">ACTIVITY & RETREAT</span>
+                <h5 id="playTitle" class="font-bold text-xs text-spa-text truncate leading-tight">伊勢志摩プライベートドッグスパ</h5>
+              </div>
+            </button>
+          </div>
+
+          <!-- Matching Facility Details Card List -->
+          <div id="facilityListContainer" class="grid sm:grid-cols-2 gap-5 pt-2">
+            <!-- Dynamically populated via JS -->
+          </div>
+
+          <!-- Nearby spots lists proxy -->
+          <div id="nearbySpotsPanel" class="hidden bg-spa-secondary/25 p-5 rounded-3xl border border-spa-secondary/80 space-y-4">
+            <div class="flex justify-between items-center border-b border-spa-primary/10 pb-4">
+              <h4 class="text-sm font-bold text-spa-primary flex items-center gap-1.5 leading-snug font-serif">
+                <i data-lucide="search" class="w-4 h-4 text-spa-primary"></i>
+                【<span id="selectedFacilityName">プレジール伊勢志摩</span>】周辺のお出かけ同伴スポット
+              </h4>
+              <button onclick="closeNearby()" class="text-xs font-bold text-spa-primary bg-white border border-spa-primary/30 hover:bg-spa-secondary/35 px-3 py-1.5 rounded-full transition cursor-pointer">閉じる</button>
+            </div>
+            
+            <div id="nearbySpotsContainer" class="grid sm:grid-cols-2 gap-4">
+              <!-- Dynamically populated via JS -->
+            </div>
+          </div>
+
+          <!-- Footer Actions -->
+          <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-spa-secondary/50">
+            <button onclick="window.print()" class="flex-1 flex items-center justify-center gap-2 text-gray-500 hover:text-spa-primary transition py-4 font-bold text-sm bg-white rounded-full border border-gray-100 active:scale-98 cursor-pointer">
+              <i data-lucide="printer" class="w-4 h-4"></i> カルテを印刷・PDF保存
+            </button>
+            <button onclick="resetDiagnosis()" class="flex-1 flex items-center justify-center gap-2 bg-spa-primary text-white py-4 rounded-full font-bold hover:opacity-90 active:scale-98 transition shadow-lg shadow-spa-primary/10 cursor-pointer">
+              <i data-lucide="home" class="w-4 h-4"></i> 新しい診断カルテを作成する
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Sidebar -->
+    <aside class="w-full lg:w-[280px] space-y-6 lg:shrink-0 text-left shrink-0">
+      
+      <!-- Kintetsu Friendly Dog Pass Card (Digital Pass) -->
+      <div class="bg-gradient-to-br from-[#12402b] via-[#1b4d36] to-spa-primary rounded-3xl p-5 shadow-lg text-white space-y-4 border border-spa-gold/20 relative overflow-hidden">
+        
+        <!-- Subtle background paw print decoration -->
+        <div class="absolute -bottom-8 -right-8 text-white/5 pointer-events-none">
+          <i data-lucide="paw-print" class="w-32 h-32"></i>
+        </div>
+
+        <div class="flex justify-between items-start border-b border-white/10 pb-3 relative z-10">
+          <div>
+            <span class="text-[9px] text-spa-gold tracking-widest font-bold uppercase block">DIGITAL CARD</span>
+            <h4 class="font-serif font-black text-sm text-white mt-0.5 tracking-tight">近鉄ドッグパス</h4>
+          </div>
+          <span class="text-[8px] bg-spa-gold text-spa-primary font-black px-2 py-0.5 rounded uppercase tracking-wider shadow-sm">
+            MEMBER
+          </span>
+        </div>
+
+        <div class="space-y-3 pt-2 relative z-10">
+          <div class="grid grid-cols-2 gap-3 text-xs">
+            <div>
+              <span class="text-[9px] text-spa-secondary/60 block font-bold">OWNER'S DOG</span>
+              <span id="passDogName" class="font-bold text-white tracking-wide block truncate">ココア ちゃん</span>
+            </div>
+            <div>
+              <span class="text-[9px] text-spa-secondary/60 block font-bold">BREED / AGE</span>
+              <span id="passDogBreedAge" class="font-bold text-white tracking-wide block truncate">トイプードル (3才)</span>
+            </div>
+          </div>
+          
+          <div class="bg-white/5 backdrop-blur-xs p-3 rounded-xl border border-white/10 flex justify-between items-center">
+            <div>
+              <span class="text-[8px] text-spa-secondary/60 block font-bold">APPROVED REGION</span>
+              <span id="passApprovedRegion" class="text-[10px] text-white font-bold tracking-wider">伊勢志摩 提携エリア</span>
+            </div>
+            <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+          </div>
+        </div>
+
+        <p class="text-[10px] text-spa-secondary/60 leading-normal pt-1 relative z-10 font-sans">
+          ※本パスポート画面を提示することで、宿、交通、提携のドッグカフェで特別アメニティやドッグ温泉の優待が受けられます。
+        </p>
+      </div>
+
+      <!-- Static Gorgeous Hot Spots List -->
+      <div class="bg-white rounded-3xl p-5 border border-spa-secondary/60 shadow-card space-y-4">
+        <h4 class="font-bold text-xs text-spa-primary uppercase tracking-wider flex items-center gap-1.5 border-b border-gray-100 pb-2">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>注目スポット & 豆知識
+        </h4>
+
+        <div class="space-y-4">
+          <!-- Item 1 -->
+          <div class="group border border-gray-100 rounded-2xl overflow-hidden hover:border-spa-primary/50 transition shadow-2xs hover:shadow-xs">
+            <div class="h-28 overflow-hidden relative">
+              <img src="https://picsum.photos/seed/kintetsu_p1/400/250" alt="spa" class="w-full h-full object-cover group-hover:scale-102 transition duration-300">
+              <span class="absolute bottom-2 right-2 bg-spa-primary text-white text-[9px] font-bold px-2 py-0.5 rounded">ドッグスパ情報</span>
+            </div>
+            <div class="p-3 text-left">
+              <h5 class="font-bold text-xs text-gray-800 leading-tight block group-hover:text-spa-primary transition">賢島エリアにプレミアム天然温泉温泉ドッグスパOPEN</h5>
+              <p class="text-[10px] text-gray-400 mt-1 leading-relaxed">ワンちゃんの皮膚に優しい美肌効果の高い弱アルカリ性単純温泉。炭酸泉シャワーも完備され、旅の汚れをすっきりクレンジング。</p>
+            </div>
+          </div>
+
+          <!-- Item 2 -->
+          <div class="group border border-gray-100 rounded-2xl overflow-hidden hover:border-spa-primary/50 transition shadow-2xs hover:shadow-xs">
+            <div class="h-28 overflow-hidden relative">
+              <img src="https://picsum.photos/seed/kintetsu_p2/400/250" alt="car" class="w-full h-full object-cover group-hover:scale-102 transition duration-300">
+              <span class="absolute bottom-2 right-2 bg-spa-gold text-white text-[9px] font-bold px-2 py-0.5 rounded">お役立ちコラム</span>
+            </div>
+            <div class="p-3 text-left">
+              <h5 class="font-bold text-xs text-gray-800 leading-tight block group-hover:text-spa-primary transition">伊勢神宮おかげ横丁の愛犬同伴マナーと楽しみ方</h5>
+              <p class="text-[10px] text-gray-400 mt-1 leading-relaxed">キャリーバッグ、またはカートでの移動で同伴可能なお店が多数！参拝の際は、愛犬一時預かりサービスをスマートに活用しましょう。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Ads (PR) -->
+      <div class="space-y-4 pt-4 border-t border-spa-secondary/40">
+        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block text-center">- COLLABORATION (PR) -</span>
+
+        <!-- Ad 3: Taxi -->
+        <div onclick="showModal('ad_taxi')" class="bg-gradient-to-br from-[#f2f6f3] to-[#e6ede8] rounded-2xl p-4 border border-emerald-300/30 relative overflow-hidden group hover:shadow-md transition cursor-pointer text-left">
+          <span class="absolute top-2 right-2 bg-emerald-500/10 text-emerald-700 text-[8px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">特別提携PR</span>
+          <div class="pr-8">
+            <h5 class="font-bold text-xs text-emerald-900 leading-snug group-hover:text-emerald-700 transition">
+              車をもっていなくても安心！<br />【近鉄ドッグ・フレンドハイヤー】
+            </h5>
+            <p class="text-[10px] text-emerald-800/85 mt-1.5 leading-relaxed">
+              大型犬もケージに入れずに広々同乗可能！除菌・消臭パーテーション完備の愛犬お出かけ専用タクシー。本診断利用で【迎車回送費無料】！
+            </p>
+          </div>
+          <div class="flex justify-between items-center mt-3 pt-2.5 border-t border-emerald-200/40">
+            <span class="text-[9px] text-emerald-600 font-bold">簡単オンライン見積り＆空き状況はこちら</span>
+            <i data-lucide="chevron-right" class="w-3 h-3 text-emerald-500 group-hover:translate-x-1 transition"></i>
+          </div>
+        </div>
+
+        <!-- Ad 4: Food -->
+        <div onclick="showModal('ad_food')" class="bg-gradient-to-br from-[#faf4f2] to-[#f4e6e1] rounded-2xl p-4 border border-rose-200/30 relative overflow-hidden group hover:shadow-md transition cursor-pointer text-left">
+          <span class="absolute top-2 right-2 bg-rose-500/10 text-rose-700 text-[8px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">提携PR</span>
+          <div class="pr-8">
+            <h5 class="font-bold text-xs text-rose-900 leading-snug group-hover:text-rose-700 transition">
+              旅先でのお腹のトラブル対策に<br />【近鉄ワン・メゾン プレミアム】
+            </h5>
+            <p class="text-[10px] text-rose-800/85 mt-1.5 leading-relaxed">
+              環境が変わるお出かけ先でも豊かな食いつきをサポート。獣医師推奨の乳酸菌＆食物繊維高配合国産プレミアム無添加ドッグフード。
+            </p>
+          </div>
+          <div class="flex justify-between items-center mt-3 pt-2.5 border-t border-rose-200/50">
+            <span class="text-[9px] text-rose-600 font-bold">先着100名に試供サンプル無料進呈中！</span>
+            <i data-lucide="chevron-right" class="w-3 h-3 text-rose-500 group-hover:translate-x-1 transition"></i>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Global Popup Modal -->
+  <div id="modalOverlay" class="hidden fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-[24px] max-w-lg w-full max-h-[85vh] flex flex-col overflow-hidden shadow-2xl relative">
+      
+      <!-- Modal Header -->
+      <div id="modalHeader" class="bg-gradient-to-r from-[#184E34] to-spa-primary p-5 text-white flex justify-between items-center shrink-0 border-b border-white/10">
+        <div class="flex items-center gap-2">
+          <i id="modalIcon" data-lucide="shield-check" class="w-5 h-5 text-spa-secondary"></i>
+          <h3 id="modalTitle" class="font-serif font-bold text-base tracking-tight">モーダルタイトル</h3>
+        </div>
+        <button onclick="closeModal()" class="text-white/80 hover:text-white transition cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div id="modalBody" class="p-6 overflow-y-auto space-y-4">
+        <!-- Content gets injected here -->
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-5 border-t border-gray-100 bg-gray-50 flex justify-end shrink-0">
+        <button onclick="closeModal()" class="px-5 py-2.5 rounded-full bg-spa-primary text-white text-xs font-bold hover:opacity-90 transition cursor-pointer">
+          閉じる
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="bg-white border-t border-spa-secondary/60 py-6 text-center text-xs text-gray-400 mt-auto">
+    <p>© 2026 Kintetsu Friendly Dog Spa. All Rights Reserved. (Standalone Version)</p>
+  </footer>
+
+  <script>
+    // State
+    const state = {
+      dogName: "ココア",
+      dogBreed: "トイプードル",
+      dogAge: 3,
+      selectedArea: "伊勢志摩",
+      answers: {
+        q1: null,
+        q2: null,
+        q3: null
+      },
+      currentCategory: "泊まる"
+    };
+
+    // UI Data Mapping
+    const characters = {
+      '内弁慶ちゃん': {
+        name: "内弁慶・甘えん坊ちゃん",
+        description: "ご家族が大好きで、おうちでは元気いっぱいですが、初めての場所や周りにワンちゃんが多い場所では少し緊張して隠れてしまいがちな、ちょっぴりデリケートな性格。急激な変化を避け、安心できるスペースを確保するのが成功の秘訣です。",
+        advice: "客室でお食事ができ、周りを気にせず過ごせるプライベート温泉完備の離れ宿が最適です。",
+        style: "他のお客さんと極力バッティングしない静かなヴィラやプライベート温泉付の宿"
+      },
+      'ワンパクちゃん': {
+        name: "ワンパク・冒険家ちゃん",
+        description: "好奇心旺盛で外の世界が大好き！元気いっぱいに駆け回るのが得意なワンちゃん。初めてのお友達や場所でも怖がらずにグイグイいける、たくましいトラベラーです。広大な屋外ドッグランやアクティビティ、爽快な風を感じるスポットがベストマッチ！",
+        advice: "思いきり走り回れる広大なドッグランを併設した宿や、アクティブな自然散策がおすすめです。",
+        style: "大型のプライベートドッグランやドッグプール、豊富なアジリティ完備の自然派リゾート"
+      },
+      '姫・王子ちゃん': {
+        name: "姫・王子なマイペースちゃん",
+        description: "お上品で自分のルーティンや心地よいペースを大切にする、ちょっぴりお姫様・お王子様タイプ。過度なはしゃぎはせず、優雅に景色を眺めたり、美味しいごはんを味わうラグジュアリーな旅を好みます。上質なアメニティやリラックスできる室内環境が大切です。",
+        advice: "極上の愛犬専用メニューや、高品質な低反発ベッド、高級ドッグスパアメニティ付きプランが最適です。",
+        style: "獣医師監修の愛犬プレミアムディナーやおもてなしケアを体験できるハイクラス宿"
+      },
+      '箱入りちゃん': {
+        name: "箱入り娘・息子のシャイちゃん",
+        description: "とても優しく穏やかですが、他の犬や大きな音が少し苦手で、お出かけ経験があまり多くない慎重派。安心できる飼い主様の真隣をキープしつつ、のんびりと過ごせる静かなプライベート旅が、自信に繋がる良いきっかけになります。",
+        advice: "ドアtoドアのタクシー移動や、貸切ドッグランなど、静寂なプライベート空間を最優先してください。",
+        style: "客室内温泉付き、完全プライベート設計の別荘スタイルの静かな離れ一軒宿"
+      }
+    };
+
+    const travelTypes = {
+      'お部屋まったり型': {
+        description: "移動による疲れや緊張を最小限にするため、チェックイン後はそのままお部屋でお食事からお風呂、お庭遊びまで完備できる「お部屋完結ステイ」が最も快適です。伊勢志摩の豊かな自然の風をお部屋から感じながら、静かなリフレッシュが叶います。"
+      },
+      'アクティブ散策型': {
+        description: "お出かけが大好きな愛犬のために、天然芝のドッグランや海岸沿いの心地よい散歩道、一緒に乗れるクルーズなど屋外体験を豊富に盛り込んだ「アドベンチャー旅」がおすすめ。思いっきり運動した後は、炭酸泉温泉スパで肉球までスッキリ癒やしましょう。"
+      }
+    };
+
+    // Matching Spot Facilities Data
+    const facilitiesData = {
+      "伊勢志摩": {
+        "泊まる": [
+          {
+            name: "プレジール伊勢志摩ドッグヴィラ",
+            image: "https://picsum.photos/seed/stay1/400/250",
+            rating: "4.9",
+            reviews: "182",
+            desc: "全棟にプライベートドッグラン＆客室ドッグ温泉炭酸泉を完備。周りを気にせず過ごせる離れの戸建てヴィラで極上のお部屋食を。",
+            match: "内弁慶・デリケートな子でも安心の完全独立離れ構造"
+          },
+          {
+            name: "シマ・オーベルジュ・レ・シアン",
+            image: "https://picsum.photos/seed/stay2/400/250",
+            rating: "4.8",
+            reviews: "95",
+            desc: "英虞湾を一望するハイクラスフレンチ宿。愛犬専用の本格ジビエコースディナーと、ラグジュアリーな専用ドッグエステ・スパ完備。",
+            match: "グルメやリフレッシュを優雅に楽しみたいマイペースな子に最適"
+          }
+        ],
+        "食べる": [
+          {
+            name: "志摩マリンサイドカフェ",
+            image: "https://picsum.photos/seed/eat1/400/250",
+            rating: "4.7",
+            reviews: "114",
+            desc: "ワンちゃん同伴率90%以上の安心オーシャンビューカフェ。無添加の伊勢鶏ささみケーキやヤギミルクが大人気です。",
+            match: "リードフック・お水サービスが全席に常備"
+          },
+          {
+            name: "おかげ横丁・伊勢の味 松風",
+            image: "https://picsum.photos/seed/eat2/400/250",
+            rating: "4.6",
+            reviews: "78",
+            desc: "テラス席および一部ペット専用個室で、極上伊勢うどんや松阪牛そぼろを愛犬と一緒に体験できる老舗お食事処。",
+            match: "お散歩がてらの立ち寄りに便利、カート貸出あり"
+          }
+        ],
+        "遊ぶ": [
+          {
+            name: "伊勢志摩プライベートドッグスパ",
+            image: "https://picsum.photos/seed/play1/400/250",
+            rating: "4.9",
+            reviews: "230",
+            desc: "近鉄不動産が手がける最新ドッグスパ。マイクロバブル天然温泉バスや高濃度炭酸泉、セルフドライサウナ完備の日帰り温泉リゾート。",
+            match: "炭酸シャワーで抜け毛や毛艶をシルクのようにケア"
+          },
+          {
+            name: "賢島エスパーニャクルーズ（あご湾遊覧）",
+            image: "https://picsum.photos/seed/play2/400/250",
+            rating: "4.7",
+            reviews: "148",
+            desc: "ケージまたはカートにて愛犬と一緒にスペイン情緒ただよう帆船に乗船可能！美しい島々のパノラマを心地よい潮風と楽しめます。",
+            match: "乗船前のデッキでお散歩＆記念撮影サービス付き"
+          }
+        ]
+      },
+      "軽井沢": {
+        "泊まる": [
+          {
+            name: "レジーナリゾート旧軽井沢",
+            image: "https://picsum.photos/seed/karui1/400/250",
+            rating: "4.9",
+            reviews: "320",
+            desc: "静寂な森に佇む一流ホテル。全室スウェーデン製ペット用フローリングと、デリケートな肌のためのハイドロスパドッグ温泉完備。",
+            match: "シニア犬・パピーにも優しい完全バリアフリー設計"
+          },
+          {
+            name: "フォレストヴィラ軽井沢 森の家",
+            image: "https://picsum.photos/seed/karui2/400/250",
+            rating: "4.8",
+            reviews: "112",
+            desc: "1日5組限定。プライベートドッグランに直結したコテージで、信州プレミアム牛のすき焼きをお部屋でまったり堪能。",
+            match: "他のワンちゃんが苦手でも安心のプライベート森ヴィラ"
+          }
+        ],
+        "食べる": [
+          {
+            name: "軽井沢ガーデンダイニング・Green",
+            image: "https://picsum.photos/seed/karuie1/400/250",
+            rating: "4.7",
+            reviews: "140",
+            desc: "森の木々に囲まれた美しいテラス。温野菜の高原サラダ仕立てなど、オーガニックな愛犬用ヘルシービュッフェが大人気。",
+            match: "大型犬もゆったりくつろげる、広々としたテーブル間隔"
+          },
+          {
+            name: "フォレスト・カフェ・テラス",
+            image: "https://picsum.photos/seed/karuie2/400/250",
+            rating: "4.6",
+            reviews: "89",
+            desc: "パンケーキとオリジナルブレンドが自慢。屋内の一部ペットエリア、およびパラソル完備テラスでワンちゃんとゆったり過ごせます。",
+            match: "ワンちゃん用温水シャワー、足洗い場完備"
+          }
+        ],
+        "遊ぶ": [
+          {
+            name: "軽井沢ドッグワン・リフレッシュパーク",
+            image: "https://picsum.photos/seed/karuip1/400/250",
+            rating: "4.8",
+            reviews: "190",
+            desc: "全面ふかふかの天然洋芝ドッグラン。浅間山を望む絶景ロケーションで、アジリティや浅瀬のドッグウォータープレイス完備。",
+            match: "思い切り走り回りたいアクティブな子にベスト"
+          },
+          {
+            name: "ハルニレテラス川の散歩道",
+            image: "https://picsum.photos/seed/karuip2/400/250",
+            rating: "4.7",
+            reviews: "260",
+            desc: "湯川のせせらぎを聞きながら、ウッドデッキや森の遊歩道をお散歩。テラス席同伴可能なショップが多数並ぶ人気お出かけスポット。",
+            match: "お散歩マナーに最適なゴミ回収ポストがエリア内完備"
+          }
+        ]
+      },
+      "箱根・富士": {
+        "泊まる": [
+          {
+            name: "凛香 富士山中湖マウント富士",
+            image: "https://picsum.photos/seed/fuji1/400/250",
+            rating: "4.9",
+            reviews: "205",
+            desc: "雄大な富士山と山中湖を望む。愛犬専用の「アルカリ性美肌温泉ドッグプール」や温水ドッグスパを完備した最高級ドッグリゾート。",
+            match: "プールや本格スパで愛犬のボディケアを堪能できる極上宿"
+          },
+          {
+            name: "箱根強羅・狗の郷 (くのさと)",
+            image: "https://picsum.photos/seed/fuji2/400/250",
+            rating: "4.8",
+            reviews: "154",
+            desc: "温泉郷に佇む和モダン宿。全室に源泉掛け流しの客室ドッグ露天風呂と、プロの手によるシャンプー＆ドライセルフサロン無料。",
+            match: "おうち大好きな内弁慶な子も、客室温泉で究極にリフレッシュ"
+          }
+        ],
+        "食べる": [
+          {
+            name: "中湖クラフトドッグ・キッチン",
+            image: "https://picsum.photos/seed/fujie1/400/250",
+            rating: "4.7",
+            reviews: "92",
+            desc: "溶岩石でじっくり焼き上げた無添加ジビエステーキなど、愛犬が大喜びするこだわり手作り料理を提供する一軒家レストラン。",
+            match: "床暖房完備のドッグ専用屋内シートあり"
+          },
+          {
+            name: "箱根パノラマ・テラス・ラウンジ",
+            image: "https://picsum.photos/seed/fujie2/400/250",
+            rating: "4.6",
+            reviews: "73",
+            desc: "芦ノ湖を見渡す絶景テラス席で、駿河湾の魚介料理や本格スイーツを愛犬と一緒に。フォトブースや犬用おやつ完備。",
+            match: "大型カートでの入店・移動もスムーズな段差レス"
+          }
+        ],
+        "遊ぶ": [
+          {
+            name: "箱根ドッグフォレスト倶楽部",
+            image: "https://picsum.photos/seed/fujip1/400/250",
+            rating: "4.8",
+            reviews: "133",
+            desc: "標高の高いヒノキの森に作られた、木漏れ日が爽快な全面ウッドチップドッグラン。森林浴しながら愛犬の関節に優しい運動が叶います。",
+            match: "足腰の負担を軽減する、優しいウッドチップ仕様"
+          },
+          {
+            name: "箱根 駒ヶ岳ロープウェイ",
+            image: "https://picsum.photos/seed/fujip2/400/250",
+            rating: "4.7",
+            reviews: "172",
+            desc: "ペット専用キャリー、または現地無料貸出カートにてケージ同乗で駒ヶ岳山頂へ！富士山と箱根全景、伊豆半島のパノラマビュー。",
+            match: "山頂の広大な芝生広場でお散歩＆絶景の記念撮影"
+          }
+        ]
+      },
+      "淡路島": {
+        "泊まる": [
+          {
+            name: "グランシャリオ北斗七星135° 【コクーン】",
+            image: "https://picsum.photos/seed/awaji1/400/250",
+            rating: "4.9",
+            reviews: "115",
+            desc: "丘の上に佇む繭（コクーン）を模したラグジュアリーヴィラ。愛犬と星空を眺め、ヒノキ風呂と極上の淡路牛すき焼きをお部屋で堪能。",
+            match: "神秘的な自然とプライベートお部屋完結で究極の癒やしを"
+          },
+          {
+            name: "海のホテル 島花 ドッグフレンドリーヴィラ",
+            image: "https://picsum.photos/seed/awaji2/400/250",
+            rating: "4.8",
+            reviews: "189",
+            desc: "専用桟橋をもつアジアンリゾート。愛犬同伴のタイ古式リフレッシュや、ドッグ専用温泉スパ、マリーナビューのタイドテラス完備。",
+            match: "プールや温水スパでワンちゃんを本格クレンジング"
+          }
+        ],
+        "食べる": [
+          {
+            name: "淡路クラフトグリル・シーサイド",
+            image: "https://picsum.photos/seed/awajie1/400/250",
+            rating: "4.7",
+            reviews: "103",
+            desc: "淡路島西海岸、夕陽100選を眼前に臨む絶景グリル。地元の鯛や淡路鶏ミンチのパテなど特製愛犬ディナーが大人気。",
+            match: "全席潮風を防ぐ風除＆防寒カーテン、ペットヒーター完備"
+          },
+          {
+            name: "島カフェ・はちみつテラス",
+            image: "https://picsum.photos/seed/awajie2/400/250",
+            rating: "4.6",
+            reviews: "61",
+            desc: "テラスを抜ける爽快な風が心地よいお洒落なハチミツ専門店。無添加ハチミツクッキーのワンちゃんおやつサービスあり。",
+            match: "芝生の中庭ドッグガーデン、セルフ撮影スポットあり"
+          }
+        ],
+        "遊ぶ": [
+          {
+            name: "あわじ花さじき ドッグパスウォーク",
+            image: "https://picsum.photos/seed/awajip1/400/250",
+            rating: "4.8",
+            reviews: "310",
+            desc: "海に続く広大な花畑のパノラマ。リードのみで全面お散歩可能！色彩豊かな四季折々の花を愛犬と一緒に鑑賞できる感動スポット。",
+            match: "四季の花々とワンちゃんを美しくおさめる特設フォト台あり"
+          },
+          {
+            name: "淡路島オーシャン・ドッグビーチ",
+            image: "https://picsum.photos/seed/awajip2/400/250",
+            rating: "4.7",
+            reviews: "155",
+            desc: "穏やかな波で、ワンちゃん専用に安全確保された貸出プライベートビーチ。波打ち際で初めての水遊びや砂浜ダッシュが楽しめます。",
+            match: "砂落とし用の温水ドッグシャワー＆ドライヤー完備"
+          }
+        ]
+      }
+    };
+
+    const nearbySpotsData = {
+      "プレジール伊勢志摩ドッグヴィラ": [
+        { name: "志摩マリンランド跡 芝生広場", dist: "徒歩4分", cat: "お散歩・芝生", d: "海風がとても気持ち良い、綺麗に刈り込まれたふかふかの芝生広場。お宿からすぐでお散歩に最適。" },
+        { name: "賢島ファミリーマート（ペット用品取扱店）", dist: "車で2分", cat: "お買い物", d: "急なフード切れやマナーパンツ、ペット用ウェットティッシュなど、豊富な犬用ケアアイテムを緊急販売。" }
+      ],
+      "シマ・オーベルジュ・レ・シアン": [
+        { name: "あご湾展望ドッグプラザ", dist: "車で3分", cat: "絶景・写真", d: "夕景が最も美しく見えるドッグフレンドリーな展望デッキ。リードフック、お散歩専用水洗ポール完備。" },
+        { name: "地産オーガニック犬おやつ 志摩工房", dist: "車で5分", cat: "お買い物", d: "地元伊勢志摩で獲れた天然の真鯛やイノシシ肉を無添加でジャーキーにしている、愛犬家絶賛のお店。" }
+      ],
+      "レジーナリゾート旧軽井沢": [
+        { name: "旧軽井沢銀座 散歩通り", dist: "徒歩8分", cat: "観光・お買い物", d: "多くのショップがドッグフレンドリーで抱っこで入店可能。お洒落なドッグアクセサリー店も多数あります。" },
+        { name: "矢ヶ崎公園 芝生エリア", dist: "車で3分", cat: "自然・お散歩", d: "池の周りをゆっくりと散策できる、軽井沢のシンボル的な自然豊かな公園。涼しい木陰が広がります。" }
+      ],
+      "フォレストヴィラ軽井沢 森の家": [
+        { name: "ハルニレテラス川のせせらぎ道", dist: "車で4分", cat: "自然・お散歩", d: "ウッドデッキを愛犬とお散歩しながら、清流の涼しさを感じられるエリア。カフェやパン屋が充実。" },
+        { name: "北軽井沢オーガニック・ドッグストア", dist: "車で8分", cat: "お買い物", d: "高品質なインポートアパレルや自然派プレミアムフードを扱う、品揃え抜群の愛犬専門ブティック。" }
+      ],
+      "凛香 富士山中湖マウント富士": [
+        { name: "山中湖パノラマ台お散歩広場", dist: "車で5分", cat: "絶景・写真", d: "富士山と山中湖、ススキ野原をバックに、息をのむような美しい記念写真が撮影できるお散歩デッキ。" },
+        { name: "中湖マリーナ（ドッグボート受付）", dist: "車で4分", cat: "レジャー", d: "ワンちゃんもライフジャケット着用で一緒に同乗できるスワンボートや、モーターボート体験が可能。" }
+      ],
+      "箱根強羅・狗の郷 (くのさと)": [
+        { name: "強羅公園ドッグコース", dist: "車で3分", cat: "観光・お散歩", d: "一部ペット進入禁止エリアを除き、ローズガーデンや噴水周りをのんびりとハイキング感覚でお散歩可能。" },
+        { name: "箱根の恵み・ペット手作り食の店", dist: "車で5分", cat: "お買い物", d: "大涌谷の温泉水や厳選された肉を使用した贅沢ドッグフードやおやつを取り扱い。お土産に最適。" }
+      ],
+      "グランシャリオ北斗七星135° 【コクーン】": [
+        { name: "淡路島ニジゲンノモリ 芝生公園", dist: "直結", cat: "自然・公園", d: "どこまでも広がる素晴らしい芝生の丘。犬連れのファミリーが多数訪れる、淡路島屈指のお散歩スポット。" },
+        { name: "淡路ハイウェイオアシスドッグフリースペース", dist: "車で6分", cat: "ドッグラン", d: "淡路海峡大橋をバックにノーリードで少し走らせることができる、ドライブ休憩に最適の無料ラン。" }
+      ],
+      "海のホテル 島花 ドッグフレンドリーヴィラ": [
+        { name: "サントピアマリーナ・ドッグプロムナード", dist: "徒歩1分", cat: "オーシャンビュー", d: "ヨットハーバーに沿って美しく舗装されたお散歩道。潮風を感じながら、優雅にお散歩を楽しめます。" },
+        { name: "淡路島ペットライフストア", dist: "車で4分", cat: "お買い物", d: "淡路島産ササミジャーキーや、旅先で使える水を使わないセルフウォッシュ・マナーパンツ等が揃う大型店。" }
+      ]
+    };
+
+    // Initialize
+    document.addEventListener("DOMContentLoaded", () => {
+      lucide.createIcons();
+      updateDogInfo();
+    });
+
+    // Helper: update live bindings based on state inputs
+    function updateDogInfo() {
+      state.dogName = document.getElementById("dogNameInput").value || "愛犬";
+      state.dogBreed = document.getElementById("dogBreedInput").value || "トイプードル";
+      state.dogAge = parseInt(document.getElementById("dogAgeInput").value) || 3;
+
+      // Reflect in live passport card & result text
+      document.getElementById("passDogName").innerText = state.dogName + " ちゃん";
+      document.getElementById("passDogBreedAge").innerText = state.dogBreed + " (" + state.dogAge + "才)";
+      document.getElementById("resultDogName").innerText = state.dogName;
+      document.getElementById("resultDogBreed").innerText = state.dogBreed;
+      document.getElementById("resultDogAge").innerText = state.dogAge + "才";
+    }
+
+    function selectArea(area) {
+      state.selectedArea = area;
+      document.getElementById("resultArea").innerText = area;
+      document.getElementById("currentAreaName").innerText = area;
+      document.getElementById("passApprovedRegion").innerText = area + " 提携エリア";
+
+      // Reset button classes
+      const areas = ["伊勢志摩", "軽井沢", "箱根・富士", "淡路島"];
+      areas.forEach(ar => {
+        const btn = document.getElementById("areaBtn-" + ar);
+        if (ar === area) {
+          btn.className = "py-2 px-2 text-center rounded-xl text-[11px] font-bold transition border bg-spa-primary text-white border-spa-primary shadow-xs";
+        } else {
+          btn.className = "py-2 px-2 text-center rounded-xl text-[11px] font-bold transition border bg-gray-50 border-gray-100 hover:bg-spa-secondary/30 text-gray-700";
+        }
+      });
+
+      // If results are open, refresh facility rendering
+      if (document.getElementById("step-result").classList.contains("hidden") === false) {
+        renderFacilities();
+      }
+    }
+
+    function startDiagnosis() {
+      hideAllSteps();
+      document.getElementById("step-q1").classList.remove("hidden");
+    }
+
+    function answerQuestion(qKey, val) {
+      state.answers[qKey] = val;
+      
+      if (qKey === "q1") {
+        hideAllSteps();
+        document.getElementById("step-q2").classList.remove("hidden");
+      } else if (qKey === "q2") {
+        hideAllSteps();
+        document.getElementById("step-q3").classList.remove("hidden");
+      } else if (qKey === "q3") {
+        showResults();
+      }
+    }
+
+    function hideAllSteps() {
+      document.getElementById("step-intro").classList.add("hidden");
+      document.getElementById("step-q1").classList.add("hidden");
+      document.getElementById("step-q2").classList.add("hidden");
+      document.getElementById("step-q3").classList.add("hidden");
+      document.getElementById("step-result").classList.add("hidden");
+    }
+
+    function getCharacterType() {
+      // Logic for determining personality
+      const q1 = state.answers.q1 || 1;
+      const q2 = state.answers.q2 || 1;
+
+      if (q1 === 1 && q2 === 1) return 'ワンパクちゃん';
+      if (q1 === 2 || q2 === 3) return '内弁慶ちゃん';
+      if (q1 === 3) return '姫・王子ちゃん';
+      return '箱入りちゃん';
+    }
+
+    function getTravelType(charType) {
+      if (charType === '内弁慶ちゃん' || charType === '箱入りちゃん') {
+        return {
+          title: "お部屋まったり型ステイ",
+          description: travelTypes['お部屋まったり型'].description
+        };
+      } else {
+        return {
+          title: "アクティブ散策型ステイ",
+          description: travelTypes['アクティブ散策型'].description
+        };
+      }
+    }
+
+    function showResults() {
+      hideAllSteps();
+      
+      const charType = getCharacterType();
+      const charInfo = characters[charType];
+      const travelType = getTravelType(charType);
+
+      // Populate text
+      document.getElementById("profileTitle").innerText = charInfo.name;
+      document.getElementById("profileDesc").innerText = charInfo.description.replaceAll('ワンちゃん', state.dogName + 'ちゃん').replaceAll('愛犬', state.dogName + 'ちゃん');
+      document.getElementById("profileAdvice").innerText = charInfo.advice;
+      document.getElementById("recommendStyle").innerText = charInfo.style;
+      
+      document.getElementById("characterLongDesc").innerText = travelType.description.replaceAll('ワンちゃん', state.dogName + 'ちゃん');
+
+      // Setup default active category tab
+      state.currentCategory = "泊まる";
+
+      // Render tab texts dynamically based on current area
+      const areaData = facilitiesData[state.selectedArea];
+      document.getElementById("stayTitle").innerText = areaData["泊まる"][0].name;
+      document.getElementById("eatTitle").innerText = areaData["食べる"][0].name;
+      document.getElementById("playTitle").innerText = areaData["遊ぶ"][0].name;
+
+      renderFacilities();
+
+      // Show result
+      document.getElementById("step-result").classList.remove("hidden");
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderFacilities() {
+      const areaData = facilitiesData[state.selectedArea];
+      const items = areaData[state.currentCategory] || [];
+      const container = document.getElementById("facilityListContainer");
+      
+      container.innerHTML = "";
+      
+      items.forEach(fac => {
+        const itemHtml = `
+          <div class="bg-white rounded-3xl p-4.5 border border-spa-secondary/80 shadow-card flex flex-col justify-between hover:shadow-md transition">
+            <div>
+              <div class="h-44 rounded-2xl overflow-hidden relative mb-4">
+                <img src="${fac.image}" alt="${fac.name}" class="w-full h-full object-cover">
+                <div class="absolute top-3 left-3 bg-white/90 backdrop-blur-xs px-2.5 py-1 rounded-lg text-[10px] font-bold text-spa-primary border border-spa-secondary shadow-xs">
+                  ★ ${fac.rating} <span class="text-gray-400">(${fac.reviews}件)</span>
+                </div>
+              </div>
+              <h4 class="font-serif font-bold text-sm text-spa-primary leading-snug">${fac.name}</h4>
+              <p class="text-[11px] text-gray-500 leading-relaxed mt-2">${fac.desc}</p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-gray-50 flex justify-between items-center">
+              <span class="text-[9px] font-bold text-spa-gold leading-none max-w-[150px] truncate">${fac.match}</span>
+              <button onclick="showNearbySpots('${fac.name}')" class="text-[10px] font-black text-spa-primary hover:underline flex items-center gap-0.5">
+                <span>周辺マップ</span>
+                <i data-lucide="search" class="w-3 h-3"></i>
+              </button>
+            </div>
+          </div>
+        `;
+        container.insertAdjacentHTML('beforeend', itemHtml);
+      });
+
+      // Update tab active styling
+      const cats = ["泊まる", "食べる", "遊ぶ"];
+      cats.forEach(c => {
+        const tab = document.getElementById("catTab-" + c);
+        if (c === state.currentCategory) {
+          tab.className = "border-2 rounded-2xl overflow-hidden cursor-pointer transition-all shadow-md border-spa-primary ring-2 ring-spa-primary/10";
+        } else {
+          tab.className = "border-2 rounded-2xl overflow-hidden cursor-pointer transition-all shadow-sm border-gray-100 hover:border-spa-primary/40";
+        }
+      });
+
+      lucide.createIcons();
+    }
+
+    function toggleCategory(cat) {
+      state.currentCategory = cat;
+      renderFacilities();
+      closeNearby();
+    }
+
+    function showNearbySpots(facilityName) {
+      const panel = document.getElementById("nearbySpotsPanel");
+      const container = document.getElementById("nearbySpotsContainer");
+      document.getElementById("selectedFacilityName").innerText = facilityName;
+
+      container.innerHTML = "";
+      const spots = nearbySpotsData[facilityName] || [];
+
+      spots.forEach(spot => {
+        const spotHtml = `
+          <div class="bg-white p-4.5 rounded-2xl shadow-xs border border-spa-secondary/40 hover:border-spa-primary transition flex flex-col justify-between">
+            <div>
+              <div class="flex justify-between items-start mb-2">
+                <span class="inline-block bg-spa-secondary text-spa-primary text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter">
+                  ${spot.cat} ✕ ${state.selectedArea}
+                </span>
+                <span class="text-xs font-bold font-mono text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full">
+                  ${spot.dist}
+                </span>
+              </div>
+              <h5 class="font-bold text-xs text-spa-text">${spot.name}</h5>
+              <p class="text-[10px] text-gray-500 mt-1.5 leading-relaxed">${spot.d}</p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-gray-50 flex justify-end">
+              <span class="text-[9px] font-bold text-spa-primary flex items-center gap-0.5">
+                <span>詳細ルートを調べる</span>
+                <i data-lucide="chevron-right" class="w-3 h-3"></i>
+              </span>
+            </div>
+          </div>
+        `;
+        container.insertAdjacentHTML('beforeend', spotHtml);
+      });
+
+      panel.classList.remove("hidden");
+      panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      lucide.createIcons();
+    }
+
+    function closeNearby() {
+      document.getElementById("nearbySpotsPanel").classList.add("hidden");
+    }
+
+    function resetDiagnosis() {
+      state.answers = { q1: null, q2: null, q3: null };
+      hideAllSteps();
+      document.getElementById("step-intro").classList.remove("hidden");
+      closeNearby();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Modal Manager
+    const modalContents = {
+      'checklist': {
+        title: "愛犬旅行 持ち物チェックリスト",
+        icon: "shield-check",
+        html: `
+          <div class="space-y-4 text-sm text-gray-650 text-left">
+            <p class="text-xs text-gray-500 leading-relaxed font-sans">
+              旅行を快適に成功させるために、愛犬用の持ち物は「マストアイテム」と「あったら便利グッズ」に分けて整理しましょう。
+            </p>
+            <div class="bg-[#faf9f6] p-4.5 rounded-xl border border-spa-secondary/80 space-y-3">
+              <h4 class="font-bold text-spa-primary text-xs flex items-center gap-1">
+                <i data-lucide="check-square" class="w-3.5 h-3.5"></i> 【絶対に必須】基本アイテム
+              </h4>
+              <div class="space-y-2">
+                <label class="flex items-start gap-2.5 text-xs font-sans text-gray-700 cursor-pointer">
+                  <input type="checkbox" checked class="mt-0.5 h-4 w-4 rounded border-gray-300 text-spa-primary focus:ring-spa-primary">
+                  <span>狂犬病予防注射済証 ＆ 混合ワクチン接種証明書（コピー可、1年以内）※宿必須</span>
+                </label>
+                <label class="flex items-start gap-2.5 text-xs font-sans text-gray-700 cursor-pointer">
+                  <input type="checkbox" checked class="mt-0.5 h-4 w-4 rounded border-gray-300 text-spa-primary focus:ring-spa-primary">
+                  <span>いつもの食べ慣れたドッグフード（小分け・1食分ずつ）とスプーン</span>
+                </label>
+                <label class="flex items-start gap-2.5 text-xs font-sans text-gray-700 cursor-pointer">
+                  <input type="checkbox" checked class="mt-0.5 h-4 w-4 rounded border-gray-300 text-spa-primary focus:ring-spa-primary">
+                  <span>普段使いのリード、首輪（迷子札付き）、ハーネス</span>
+                </label>
+                <label class="flex items-start gap-2.5 text-xs font-sans text-gray-700 cursor-pointer">
+                  <input type="checkbox" class="mt-0.5 h-4 w-4 rounded border-gray-300 text-spa-primary focus:ring-spa-primary">
+                  <span>マナーパンツ・マナーベルト（ホテルのパブリックスペース等で必須）</span>
+                </label>
+                <label class="flex items-start gap-2.5 text-xs font-sans text-gray-700 cursor-pointer">
+                  <input type="checkbox" class="mt-0.5 h-4 w-4 rounded border-gray-300 text-spa-primary focus:ring-spa-primary">
+                  <span>ウンチ袋、消臭袋、ペットシーツ、ウェットティッシュ</span>
+                </label>
+              </div>
+            </div>
+            <div class="bg-emerald-50/20 p-4.5 rounded-xl border border-emerald-100 space-y-3">
+              <h4 class="font-bold text-emerald-800 text-xs flex items-center gap-1">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> 【あると快適】おすすめケア
+              </h4>
+              <div class="space-y-2">
+                <label class="flex items-start gap-2.5 text-xs font-sans text-gray-700 cursor-pointer">
+                  <input type="checkbox" class="mt-0.5 h-4 w-4 rounded border-gray-300 text-spa-primary focus:ring-spa-primary">
+                  <span>普段の自分の匂いがついたベッドカバーやブランケット（お部屋で落ち着くため）</span>
+                </label>
+                <label class="flex items-start gap-2.5 text-xs font-sans text-gray-700 cursor-pointer">
+                  <input type="checkbox" class="mt-0.5 h-4 w-4 rounded border-gray-300 text-spa-primary focus:ring-spa-primary">
+                  <span>お出かけ用バギー、またはクレート、お散歩バッグ</span>
+                </label>
+                <label class="flex items-start gap-2.5 text-xs font-sans text-gray-700 cursor-pointer">
+                  <input type="checkbox" class="mt-0.5 h-4 w-4 rounded border-gray-300 text-spa-primary focus:ring-spa-primary">
+                  <span>足拭きタオル、ブラシ、虫除けスプレー（特に伊勢志摩や森の散歩に必須）</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      'etiquette': {
+        title: "愛犬とお出かけ・車移動マナー",
+        icon: "heart-pulse",
+        html: `
+          <div class="space-y-4 text-sm text-gray-650 text-left">
+            <p class="text-xs text-gray-500 leading-relaxed font-sans">
+              車移動や公共エリアで、ワンちゃんが安全に過ごし、周囲への配慮を欠かさないためのマナー集です。
+            </p>
+            <div class="bg-emerald-50/40 rounded-2xl p-4.5 border border-emerald-100 space-y-3.5">
+              <div class="flex gap-2.5">
+                <span class="bg-spa-primary text-white text-[11px] font-black h-5 w-5 rounded-full flex items-center justify-center shrink-0">1</span>
+                <div>
+                  <h5 class="font-bold text-gray-800 text-xs">乗車直前のお食事・排泄</h5>
+                  <p class="text-[10px] text-gray-500 leading-normal mt-0.5">出発の2〜3時間前にお食事を済ませ、乗車直前に軽いお散歩でおしっこ・ウンチを済ませるのが鉄則です。</p>
+                </div>
+              </div>
+              <div class="flex gap-2.5 border-t border-emerald-100/60 pt-3.5">
+                <span class="bg-spa-primary text-white text-[11px] font-black h-5 w-5 rounded-full flex items-center justify-center shrink-0">2</span>
+                <div>
+                  <h5 class="font-bold text-gray-800 text-xs">車内での安全確保（クレート必須）</h5>
+                  <p class="text-[10px] text-gray-500 leading-normal mt-0.5">急ブレーキや予期せぬ衝撃から守るため、頑丈なクレートに入れるか、犬用シートベルト付ハーネスで確実に固定しましょう。</p>
+                </div>
+              </div>
+              <div class="flex gap-2.5 border-t border-emerald-100/60 pt-3.5">
+                <span class="bg-spa-primary text-white text-[11px] font-black h-5 w-5 rounded-full flex items-center justify-center shrink-0">3</span>
+                <div>
+                  <h5 class="font-bold text-gray-800 text-xs">こまめな休憩（1〜1.5時間おき）</h5>
+                  <p class="text-[10px] text-gray-500 leading-normal mt-0.5">高速道路のドッグラン付サービスエリア等をあらかじめ調べておき、こまめに水分補給とリフレッシュを行いましょう。</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      'coupon': {
+        title: "10%OFF 特別ご優待クーポン",
+        icon: "ticket",
+        html: `
+          <div class="space-y-4 text-center">
+            <p class="text-xs text-gray-500 leading-relaxed font-sans max-w-sm mx-auto">
+              近鉄ドッグスパ提携のプレミアムホテルで使える、期間限定のスペシャル宿泊ご優待クーポンコードです。
+            </p>
+            <div class="bg-amber-50 rounded-2xl p-6 border border-amber-200 space-y-3.5">
+              <span class="text-[9px] font-black uppercase tracking-widest text-amber-800 block">KINTETSU FRIENDLY SPECIAL COUPON</span>
+              <h4 class="font-serif font-black text-xl text-amber-900 leading-none">宿泊代金 10% OFF</h4>
+              <div class="h-px bg-amber-250 w-24 mx-auto"></div>
+              <p class="text-[10px] text-amber-700/85">ご予約時に以下のコードを入力して適用してください。</p>
+              
+              <div class="bg-white rounded-xl p-3 border border-amber-200 inline-flex items-center gap-4 shadow-xs">
+                <span class="font-mono text-base font-extrabold text-spa-primary tracking-wider">KINTETSU_DOG2026</span>
+                <button onclick="navigator.clipboard.writeText('KINTETSU_DOG2026'); alert('クーポンコードをコピーしました！')" class="p-2 rounded-lg bg-spa-primary text-white hover:opacity-95 text-[10px] font-bold">コピー</button>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      'ad_laurel': {
+        title: "ローレルコート for Dog 特別相談会",
+        icon: "award",
+        html: `
+          <div class="space-y-4 text-sm text-gray-650 text-left">
+            <div class="h-40 rounded-2xl overflow-hidden relative shadow-inner">
+              <img src="https://picsum.photos/seed/ad_laurel/500/300" alt="Laurel Court" class="w-full h-full object-cover">
+              <span class="absolute bottom-3 left-3 bg-amber-600 text-[10px] text-white px-2.5 py-1 rounded font-bold">
+                近鉄不動産の分譲マンション
+              </span>
+            </div>
+            <h4 class="text-base font-bold text-gray-850 font-serif leading-snug">
+              愛犬との一生を変える住まい：ローレルコート for Dog
+            </h4>
+            <p class="text-xs text-gray-500 leading-relaxed">
+              共用スペースに足洗い場、犬用マイクロバブル温泉、そして広大なプライベートドッグランを完備。滑りにくく傷がつきにくい消臭・抗菌特殊フローリングを標準装備した、愛犬ファースト設計の新築プレミアム分譲マンションです。
+            </p>
+            <div class="bg-amber-50 p-4.5 rounded-2xl border border-amber-250">
+              <span class="text-xs font-bold text-amber-900 block mb-1">【トラベルカルテ診断 特典キャンペーン】</span>
+              <p class="text-xs text-amber-800 leading-normal mb-3">
+                本カルテ画面をモデルルーム見学時に提示すると、<strong>【愛犬専用オーガニック無添加プレミアムおやつ詰め合わせ】</strong>を特別プレゼント。
+              </p>
+              <div class="text-center font-mono font-bold bg-white text-amber-700 py-1.5 rounded-xl border border-amber-300 tracking-wider text-xs">
+                紹介キーコード：LC_DOG_TRAVEL2026
+              </div>
+            </div>
+          </div>
+        `
+      },
+      'ad_insurance': {
+        title: "近鉄のペットあんしん保険 ご案内",
+        icon: "shield-check",
+        html: `
+          <div class="space-y-4 text-sm text-gray-650 text-left">
+            <div class="h-40 rounded-2xl overflow-hidden relative shadow-inner">
+              <img src="https://picsum.photos/seed/ad_insurance/500/300" alt="Pet Insurance" class="w-full h-full object-cover">
+              <span class="absolute bottom-3 left-3 bg-blue-800 text-[10px] text-white px-2.5 py-1 rounded font-bold">
+                近鉄ゴールドケアあんしん特約
+              </span>
+            </div>
+            <h4 class="text-base font-bold text-gray-850 font-serif leading-snug">
+              旅先でのどんなアクシデントも。安心の賠償最大1,000万円補償！
+            </h4>
+            <p class="text-xs text-gray-500 leading-relaxed">
+              旅行中、興奮した愛犬がホテルの高級な障子や備品・家具を破いてしまった、あるいは旅先で他者とトラブルになってしまった...そんな万が一の賠償責任を手厚くカバーする、1日約35円のおすすめペット保険。
+            </p>
+            <ul class="space-y-2 text-[11px] text-gray-600 bg-gray-50 p-4 rounded-xl list-disc list-inside">
+              <li>通院・入院・手術時の窓口精算・自己負担ゼロ（最大90%補償）</li>
+              <li>賠償責任特約つき（月額換算約120円の特約追加で自動保障）</li>
+              <li>24時間365日いつでも相談可能！「プロの資格者による無料獣医師相談窓口」付帯</li>
+            </ul>
+          </div>
+        `
+      },
+      'ad_taxi': {
+        title: "ドッグ・フレンドハイヤー ご優待窓口",
+        icon: "award",
+        html: `
+          <div class="space-y-4 text-sm text-gray-650 text-left">
+            <div class="h-40 rounded-2xl overflow-hidden relative shadow-inner">
+              <img src="https://picsum.photos/seed/ad_taxi/500/300" alt="Dog Taxi" class="w-full h-full object-cover">
+              <span class="absolute bottom-3 left-3 bg-emerald-800 text-[10px] text-white px-2.5 py-1 rounded font-bold">
+                ドアToドアの安心プライベート送迎
+              </span>
+            </div>
+            <h4 class="text-base font-bold text-gray-850 font-serif leading-snug">
+              電車や一般タクシーが苦手な子も安心：近鉄ドッグ・フレンドハイヤー
+            </h4>
+            <p class="text-xs text-gray-500 leading-relaxed">
+              大型犬もケージに入れずに広々同乗可能！除菌・消臭パーテーション完備の愛犬お出かけ専用タクシー。専属のドッグフレンドリーなドライバーが同伴し、最高の旅行をサポートします。
+            </p>
+            <div class="bg-emerald-50/70 p-4.5 rounded-2xl border border-emerald-250">
+              <span class="text-xs font-bold text-emerald-950 block mb-1">【トラベルカルテ連動 優待】</span>
+              <p class="text-xs text-emerald-850 leading-normal mb-2">
+                本カルテ予約窓口からの優待コード適用で、<strong>【迎車回送手数料（最大3,500円相当）が完全無料】</strong>。
+              </p>
+              <div class="text-center font-mono font-bold bg-white text-emerald-800 py-1.5 rounded-xl border border-emerald-300 text-xs">
+                優待コード：K_HARE_TAXI2026
+              </div>
+            </div>
+          </div>
+        `
+      },
+      'ad_food': {
+        title: "ワン・メゾン プレミアム 無料試供プラン",
+        icon: "award",
+        html: `
+          <div class="space-y-4 text-sm text-gray-650 text-left">
+            <div class="h-40 rounded-2xl overflow-hidden relative shadow-inner">
+              <img src="https://picsum.photos/seed/ad_food/500/300" alt="Dog Food" class="w-full h-full object-cover">
+              <span class="absolute bottom-3 left-3 bg-rose-800 text-[10px] text-white px-2.5 py-1 rounded font-bold">
+                近鉄プレミアムドッグリゾート公認推奨
+              </span>
+            </div>
+            <h4 class="text-base font-bold text-gray-850 font-serif leading-snug">
+              旅先でのおなかのゆるみ・食欲不振に：近鉄ワン・メゾン プレミアム
+            </h4>
+            <p class="text-xs text-gray-500 leading-relaxed">
+              遠出ストレスによる消化不良や胃腸の調子を整える国産プレミアム無添加フード。お腹のスマート乳酸菌＆国産さつまいも繊維を独自配合し、驚きの食いつきを実現。
+            </p>
+            <div class="bg-rose-50/70 p-4.5 rounded-2xl border border-rose-200">
+              <span class="text-xs font-bold text-rose-900 block mb-1">【1,000袋限定 無料サンプリング】</span>
+              <p class="text-xs text-rose-800 leading-normal mb-3">
+                食べ切りパック（150g×3個パック：1,800円相当）を送料も含め<strong>【完全ゼロ円】</strong>でご自宅にお送りします！
+              </p>
+              <div class="text-center font-mono font-bold bg-white text-rose-800 py-1.5 rounded-xl border border-rose-300 text-xs">
+                サンプル請求コード：W_MAISON_SAMPLE2026
+              </div>
+            </div>
+          </div>
+        `
+      }
+    };
+
+    function showModal(type) {
+      const info = modalContents[type];
+      if (!info) return;
+
+      document.getElementById("modalTitle").innerText = info.title;
+      document.getElementById("modalBody").innerHTML = info.html;
+      
+      const iconEl = document.getElementById("modalIcon");
+      iconEl.setAttribute("data-lucide", info.icon);
+
+      document.getElementById("modalOverlay").classList.remove("hidden");
+      lucide.createIcons();
+    }
+
+    function closeModal() {
+      document.getElementById("modalOverlay").classList.add("hidden");
+    }
+
+    // Function to download the entire standalone HTML file as a single file
+    function downloadSelf() {
+      const htmlContent = document.documentElement.outerHTML;
+      const blob = new Blob([htmlContent], { type: "text/html" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "kintetsu-dog-kart.html";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>
